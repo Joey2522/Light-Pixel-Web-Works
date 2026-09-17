@@ -52,7 +52,7 @@ form?.addEventListener('submit', async (event) => {
     }
     form.reset();
     if (note) {
-      note.textContent = 'Thanks! Your inquiry was submitted. If this is our first submission, we must confirm the activation email before delivery begins.';
+      note.textContent = 'Thanks! Your inquiry was submitted. We’ll be in touch soon.';
       note.style.color = '#166534';
     }
   } catch (error) {
