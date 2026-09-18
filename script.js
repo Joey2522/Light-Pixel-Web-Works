@@ -13,13 +13,21 @@ document.querySelectorAll('.nav a').forEach((link) => {
   });
 });
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && nav?.classList.contains('open')) {
+    nav.classList.remove('open');
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.focus();
+  }
+});
+
 const year = document.querySelector('#year');
 if (year) year.textContent = new Date().getFullYear();
 
 const form = document.querySelector('#projectForm');
 const note = document.querySelector('#formNote');
 if (note) {
-  note.textContent = 'Your inquiry will be sent securely through our form delivery provider.';
+  note.textContent = 'Your inquiry is sent through FormSubmit so we can reply to your request.';
   note.setAttribute('role', 'status');
   note.setAttribute('aria-live', 'polite');
 }
@@ -39,15 +47,18 @@ form?.addEventListener('submit', async (event) => {
     note.style.color = '#526b85';
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const fields = Object.fromEntries(new FormData(form).entries());
     const response = await fetch('https://formsubmit.co/ajax/hello@lightandpixelwebworks.com', {
       method: 'POST',
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ ...fields, _subject: 'New Light & Pixel website inquiry', _template: 'table' })
     });
     const result = await response.json();
-    if (!response.ok || result.success === false || result.success === 'false') {
+    if (!response.ok || (result.success !== true && result.success !== 'true')) {
       throw new Error('The form service did not accept the submission.');
     }
     form.reset();
@@ -61,6 +72,7 @@ form?.addEventListener('submit', async (event) => {
       note.style.color = '#b91c1c';
     }
   } finally {
+    clearTimeout(timeout);
     if (button) {
       button.disabled = false;
       button.textContent = originalLabel;
